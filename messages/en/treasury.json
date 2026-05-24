@@ -2,6 +2,21 @@
   "page": {
     "title": "Treasury",
     "description": "Overview of the Gnars DAO treasury holdings and financial position",
+    "header": {
+      "label": "Allocation · live",
+      "subtitleWithUsd": "Composition of {total} across the DAO's ETH, stables, and in-treasury collection.",
+      "subtitleNoUsd": "Holdings and financial position of the DAO treasury."
+    },
+    "donut": {
+      "noUsd": "USD prices unavailable — showing balances only."
+    },
+    "assets": {
+      "nativeAsset": "Native asset",
+      "stableReserve": "Stable reserve",
+      "wrapped": "Wrapped",
+      "erc20": "ERC-20",
+      "nftsInTreasury": "{count} in treasury"
+    },
     "kpis": {
       "totalValue": "Total Treasury Value",
       "ethBalance": "ETH Balance",
@@ -10,6 +25,12 @@
     "nftSection": {
       "title": "NFT Holdings",
       "description": "Non-fungible tokens held in the treasury"
+    },
+    "txCard": {
+      "title": "Recent transactions",
+      "subtitle": "From treasury safe · last 30 days",
+      "empty": "No transactions in the last 30 days.",
+      "viewAll": "View all on {explorer} ↗"
     }
   },
   "tokens": {
@@ -45,7 +66,8 @@
     "count": "{count, plural, one {# Gnar found} other {# Gnars found}}",
     "empty": "No NFTs found",
     "emptyDescription": "The treasury currently holds no Gnars",
-    "errorLoading": "Error loading NFT holdings: {error}"
+    "errorLoading": "Error loading NFT holdings: {error}",
+    "proposeTransfer": "Propose transfer"
   },
   "charts": {
     "auctionRevenue": {

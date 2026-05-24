@@ -31,16 +31,48 @@ export function ProposalWizard() {
   const templateSlug = searchParams.get("template");
   const detailsFormRef = useRef<ProposalDetailsFormHandle | null>(null);
 
+  const actionParam = searchParams.get("action");
+  const tokenIdParam = searchParams.get("tokenId");
+  const contractParam = searchParams.get("contract");
+  const fromParam = searchParams.get("from");
+  const imageParam = searchParams.get("image");
+
+  const hasSendNftsPreFill =
+    actionParam === "send-nfts" &&
+    !!tokenIdParam &&
+    !!contractParam &&
+    !!fromParam;
+
   const methods = useForm<ProposalFormValues>({
     resolver: zodResolver(proposalSchema),
     defaultValues: {
       title: "",
       description: "",
       bannerImage: undefined,
-      transactions: [],
+      transactions: hasSendNftsPreFill
+        ? [
+            {
+              type: "send-nfts",
+              contractAddress: contractParam as `0x${string}`,
+              from: fromParam as `0x${string}`,
+              to: "" as `0x${string}`,
+              tokenId: tokenIdParam!,
+              nftImage: imageParam ?? undefined,
+              description: "",
+            },
+          ]
+        : [],
     },
     mode: "onChange",
   });
+
+  // Jump to transactions tab when pre-filled via URL params
+  useEffect(() => {
+    if (hasSendNftsPreFill) {
+      setCurrentTab("transactions");
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Pre-fill title from template. Description is compiled inside TemplateDetailsForm.
   useEffect(() => {

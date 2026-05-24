@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { GnarCard } from "@/components/auctions/GnarCard";
 import { LoadingGridSkeleton } from "@/components/skeletons/loading-grid-skeleton";
 import { Card, CardContent } from "@/components/ui/card";
@@ -59,6 +60,7 @@ export function NftHoldings({ treasuryAddress }: NftHoldingsProps) {
   const t = useTranslations("treasury");
   const locale = useLocale();
   const intlLocale = toIntlLocale(locale);
+  const router = useRouter();
   const PAGE_SIZE = 20;
   const [tokens, setTokens] = useState<
     Array<{
@@ -83,7 +85,6 @@ export function NftHoldings({ treasuryAddress }: NftHoldingsProps) {
         const dao = DAO_ADDRESSES.token.toLowerCase();
         const owner = treasuryAddress.toLowerCase();
 
-        // Fetch all tokens using pagination (max 1000 per query in The Graph)
         const BATCH_SIZE = 1000;
         let allTokens: TreasuryTokensQuery["tokens"] = [];
         let skip = 0;
@@ -99,11 +100,10 @@ export function NftHoldings({ treasuryAddress }: NftHoldingsProps) {
 
           if (ignore) return;
 
-          const tokens = data.tokens || [];
-          allTokens = [...allTokens, ...tokens];
+          const batch = data.tokens || [];
+          allTokens = [...allTokens, ...batch];
 
-          // If we got less than BATCH_SIZE results, we've reached the end
-          hasMore = tokens.length === BATCH_SIZE;
+          hasMore = batch.length === BATCH_SIZE;
           skip += BATCH_SIZE;
         }
 
@@ -166,11 +166,7 @@ export function NftHoldings({ treasuryAddress }: NftHoldingsProps) {
       (entries) => {
         const [entry] = entries;
         if (!entry?.isIntersecting) return;
-
-        setVisibleCount((prev) => {
-          const next = prev + PAGE_SIZE;
-          return next;
-        });
+        setVisibleCount((prev) => prev + PAGE_SIZE);
       },
       { rootMargin: "200px" },
     );
@@ -180,6 +176,17 @@ export function NftHoldings({ treasuryAddress }: NftHoldingsProps) {
       observer.disconnect();
     };
   }, [tokens, isLoading, PAGE_SIZE]);
+
+  const handleNftClick = (token: { id: number; imageUrl?: string }) => {
+    const params = new URLSearchParams({
+      action: "send-nfts",
+      contract: DAO_ADDRESSES.token,
+      from: treasuryAddress,
+      tokenId: String(token.id),
+    });
+    if (token.imageUrl) params.set("image", token.imageUrl);
+    router.push(`/${locale}/propose?${params.toString()}`);
+  };
 
   if (isLoading) {
     return <LoadingGridSkeleton items={8} />;
@@ -221,14 +228,22 @@ export function NftHoldings({ treasuryAddress }: NftHoldingsProps) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {tokens.slice(0, visibleCount).map((token) => (
-          <GnarCard
+          <button
             key={`gnar-${token.id}`}
-            tokenId={token.id}
-            imageUrl={token.imageUrl}
-            dateLabel={token.dateLabel}
-            finalBidEth={token.finalBidEth ?? null}
-            winnerAddress={token.winnerAddress ?? null}
-          />
+            type="button"
+            onClick={() => handleNftClick(token)}
+            className="text-left cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl group"
+            title={t("nfts.proposeTransfer")}
+          >
+            <GnarCard
+              tokenId={token.id}
+              imageUrl={token.imageUrl}
+              dateLabel={token.dateLabel}
+              finalBidEth={token.finalBidEth ?? null}
+              winnerAddress={token.winnerAddress ?? null}
+              className="group-hover:shadow-lg group-hover:ring-2 group-hover:ring-primary/40 transition-all"
+            />
+          </button>
         ))}
       </div>
       {visibleCount < tokens.length && <div ref={sentinelRef} className="h-10" />}

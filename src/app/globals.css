@@ -45,6 +45,24 @@
 }
 
 :root {
+  --surface: var(--card);
+  --surface-2: var(--muted);
+  --surface-3: var(--secondary);
+  --muted-fg: var(--muted-foreground);
+  --fg: var(--foreground);
+  --accent-color: oklch(0.6 0.2 250);
+}
+
+.dark {
+  --surface: var(--card);
+  --surface-2: var(--muted);
+  --surface-3: var(--secondary);
+  --muted-fg: var(--muted-foreground);
+  --fg: var(--foreground);
+  --accent-color: oklch(0.72 0.18 250);
+}
+
+:root {
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);

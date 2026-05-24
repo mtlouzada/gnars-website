@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY;
+const ALCHEMY_API_KEY =
+  process.env.ALCHEMY_API_KEY || process.env.NEXT_PUBLIC_ALCHEMY_API_KEY;
 const ALCHEMY_BASE_URL = ALCHEMY_API_KEY
   ? `https://base-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`
   : null;
@@ -10,7 +11,6 @@ export async function POST(request: NextRequest) {
   try {
     const { method, params } = await request.json();
 
-    // Define interface for JSON-RPC request body
     interface JsonRpcRequestBody {
       jsonrpc: string;
       id: number;
@@ -18,7 +18,6 @@ export async function POST(request: NextRequest) {
       params: unknown[];
     }
 
-    // Handle different Alchemy API methods
     let requestBody: JsonRpcRequestBody = {
       jsonrpc: "2.0",
       id: 1,
@@ -26,16 +25,18 @@ export async function POST(request: NextRequest) {
       params: params || [],
     };
 
-    // Special handling for Alchemy-specific methods that use different endpoints
     let url = ALCHEMY_BASE_URL ?? BASE_RPC_URL;
 
     if (method === "alchemy_getTokenBalances") {
-      // Support optional contract allowlist or "DEFAULT_TOKENS" as second param
-      // Params shape (JSON-RPC): [address, contractAddresses?]
       const address = Array.isArray(params) ? params[0] : undefined;
       const secondParam = Array.isArray(params) ? params[1] : undefined;
       const hasFilter =
         typeof secondParam === "string" || Array.isArray(secondParam) ? true : false;
+
+      if (!ALCHEMY_API_KEY) {
+        return NextResponse.json({ result: { tokenBalances: [] } });
+      }
+
       requestBody = {
         jsonrpc: "2.0",
         id: 1,
@@ -43,22 +44,37 @@ export async function POST(request: NextRequest) {
         params: hasFilter ? [address, secondParam as unknown[]] : [address],
       };
     } else if (method === "alchemy_getTokenMetadata") {
+      if (!ALCHEMY_API_KEY) {
+        return NextResponse.json({ result: { name: null, symbol: null, decimals: null, logo: null } });
+      }
       requestBody = {
         jsonrpc: "2.0",
         id: 1,
         method: "alchemy_getTokenMetadata",
-        params: [params[0]], // contract address
+        params: [params[0]],
       };
     } else if (method === "alchemy_getNfts") {
+      if (!ALCHEMY_API_KEY) {
+        return NextResponse.json({ result: { ownedNfts: [], totalCount: 0 } });
+      }
       requestBody = {
         jsonrpc: "2.0",
         id: 1,
         method: "alchemy_getNFTs",
         params: [params[0], params[1] || { withMetadata: true }],
       };
+    } else if (method === "alchemy_getAssetTransfers") {
+      if (!ALCHEMY_API_KEY) {
+        return NextResponse.json({ result: { transfers: [] } });
+      }
+      requestBody = {
+        jsonrpc: "2.0",
+        id: 1,
+        method: "alchemy_getAssetTransfers",
+        params: Array.isArray(params) ? params : [params],
+      };
     }
 
-    // If Alchemy is not configured and request is eth_getBalance, send straight to Base RPC
     if (!ALCHEMY_API_KEY && method === "eth_getBalance") {
       url = BASE_RPC_URL;
     }
@@ -72,7 +88,6 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(requestBody),
     });
 
-    // If Alchemy call fails for balance, retry against Base RPC once
     if (!response.ok) {
       if (method === "eth_getBalance" && url !== BASE_RPC_URL) {
         const fallbackRes = await fetch(BASE_RPC_URL, {

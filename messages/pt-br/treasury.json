@@ -2,6 +2,21 @@
   "page": {
     "title": "Tesouro",
     "description": "Visão geral dos holdings do tesouro da Gnars DAO e da posição financeira",
+    "header": {
+      "label": "Alocação · ao vivo",
+      "subtitleWithUsd": "Composição de {total} entre ETH, stablecoins e coleção do tesouro.",
+      "subtitleNoUsd": "Holdings e posição financeira do tesouro da DAO."
+    },
+    "donut": {
+      "noUsd": "Preços em USD indisponíveis — exibindo apenas saldos."
+    },
+    "assets": {
+      "nativeAsset": "Ativo nativo",
+      "stableReserve": "Reserva estável",
+      "wrapped": "Wrapped",
+      "erc20": "ERC-20",
+      "nftsInTreasury": "{count} no tesouro"
+    },
     "kpis": {
       "totalValue": "Valor Total do Tesouro",
       "ethBalance": "Saldo de ETH",
@@ -10,6 +25,12 @@
     "nftSection": {
       "title": "Holdings de NFT",
       "description": "Tokens não-fungíveis mantidos no tesouro"
+    },
+    "txCard": {
+      "title": "Transações recentes",
+      "subtitle": "Do safe do tesouro · últimos 30 dias",
+      "empty": "Nenhuma transação nos últimos 30 dias.",
+      "viewAll": "Ver todas no {explorer} ↗"
     }
   },
   "tokens": {
@@ -45,7 +66,8 @@
     "count": "{count, plural, one {# Gnar encontrado} other {# Gnars encontrados}}",
     "empty": "Nenhum NFT encontrado",
     "emptyDescription": "O tesouro não tem Gnars no momento",
-    "errorLoading": "Erro ao carregar holdings de NFT: {error}"
+    "errorLoading": "Erro ao carregar holdings de NFT: {error}",
+    "proposeTransfer": "Propor transferência"
   },
   "charts": {
     "auctionRevenue": {

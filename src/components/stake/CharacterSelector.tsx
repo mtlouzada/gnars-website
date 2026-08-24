@@ -132,7 +132,6 @@ export const CHARACTERS: Character[] = [
   {
     id: "v2",
     image: "/stake/cutout/v2.png",
-    disabled: true,
     accentFrom: "from-rose-400",
     accentTo: "to-red-600",
     ring: "ring-rose-400",
